@@ -1,4 +1,4 @@
-<img width="1846" height="1023" alt="image" src="https://github.com/user-attachments/assets/9977a307-e26c-49b4-8d9d-717c71ee7e44" /># 📈 Real-Time Stock Market Data Engineering Pipeline
+># 📈 Real-Time Stock Market Data Engineering Pipeline
 
 > End-to-end real-time stock market data engineering project using Python, Kafka, MinIO, Apache Airflow, Snowflake, dbt and Power BI.
 
