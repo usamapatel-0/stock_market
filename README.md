@@ -1,4 +1,4 @@
-# 📈 Real-Time Stock Market Data Engineering Pipeline
+<img width="1846" height="1023" alt="image" src="https://github.com/user-attachments/assets/9977a307-e26c-49b4-8d9d-717c71ee7e44" /># 📈 Real-Time Stock Market Data Engineering Pipeline
 
 > End-to-end real-time stock market data engineering project using Python, Kafka, MinIO, Apache Airflow, Snowflake, dbt and Power BI.
 
@@ -546,6 +546,8 @@ The project includes:
 ```text
 STOCK.pbix
 ```
+<img width="1647" height="990" alt="Screenshot 2026-09-17 114128" src="https://github.com/user-attachments/assets/ef0c2f52-13fc-4dcf-8ef3-5c9add194d24" />
+
 
 Power BI connects to Snowflake using **DirectQuery**.
 
