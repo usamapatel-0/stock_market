@@ -1,11 +1,13 @@
 #Import Requirements
+import os
 import time
 import json
 import requests
 from kafka import KafkaProducer
 
 #Define Variables For API
-API_KEY = "daf5uq9r01qqo7nve7tgdaf5uq9r01qqo7nve7u0"
+API_KEY = os.environ.get("FINNHUB_API_KEY")
+
 BASE_URL = "https://finnhub.io/api/v1/quote"
 SYMBOLS = ["AAPL", "MSFT", "TSLA", "GOOGL", "AMZN"]
 

@@ -4,6 +4,7 @@ import snowflake.connector
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 from datetime import datetime, timedelta
 
 
@@ -12,8 +13,9 @@ from datetime import datetime, timedelta
 # ============================================================
 
 MINIO_ENDPOINT = "http://minio:9000"
-MINIO_ACCESS_KEY = "admin"
-MINIO_SECRET_KEY = "password123"
+MINIO_ACCESS_KEY = os.environ.get("MINIO_ROOT_USER")
+MINIO_SECRET_KEY = os.environ.get("MINIO_ROOT_PASSWORD")
+
 BUCKET = "bronze-transactions"
 
 LOCAL_DIR = "/tmp/minio_downloads"
@@ -24,7 +26,10 @@ LOCAL_DIR = "/tmp/minio_downloads"
 # ============================================================
 
 SNOWFLAKE_USER = "USAMAPATEL"
-SNOWFLAKE_PASSWORD = "TJjmxDnWrpX5bbr"
+
+# Password environment variable se read hoga
+SNOWFLAKE_PASSWORD = os.environ.get("SNOWFLAKE_PASSWORD")
+
 SNOWFLAKE_ACCOUNT = "lv45656.ap-southeast-7.aws"
 
 SNOWFLAKE_WAREHOUSE = "COMPUTE_WH"
@@ -109,6 +114,15 @@ def load_to_snowflake(**kwargs):
     )
 
     # --------------------------------------------------------
+    # Validate Snowflake password
+    # --------------------------------------------------------
+
+    if not SNOWFLAKE_PASSWORD:
+        raise ValueError(
+            "SNOWFLAKE_PASSWORD environment variable is not set."
+        )
+
+    # --------------------------------------------------------
     # Connect to Snowflake
     # --------------------------------------------------------
 
@@ -125,7 +139,9 @@ def load_to_snowflake(**kwargs):
 
     try:
 
-        print("Connected to Snowflake successfully.")
+        print(
+            "Connected to Snowflake successfully."
+        )
 
         # ----------------------------------------------------
         # Upload files to Snowflake table stage
@@ -196,7 +212,9 @@ def load_to_snowflake(**kwargs):
 # ============================================================
 
 default_args = {
+
     "owner": "airflow",
+
     "depends_on_past": False,
 
     "start_date": datetime(
@@ -219,25 +237,26 @@ default_args = {
 
 with DAG(
 
-    dag_id="minio_to_snowflake",
+    dag_id="stock_data_pipeline",
 
     default_args=default_args,
 
-    schedule_interval="*/1 * * * *",
+    schedule_interval="*/5 * * * *",
 
     catchup=False,
 
     tags=[
         "minio",
         "snowflake",
+        "dbt",
         "stocks"
     ],
 
 ) as dag:
 
-    # --------------------------------------------------------
-    # Task 1: MinIO → Airflow
-    # --------------------------------------------------------
+    # ========================================================
+    # TASK 1: MINIO → AIRFLOW
+    # ========================================================
 
     task1 = PythonOperator(
 
@@ -248,9 +267,9 @@ with DAG(
     )
 
 
-    # --------------------------------------------------------
-    # Task 2: Airflow → Snowflake
-    # --------------------------------------------------------
+    # ========================================================
+    # TASK 2: AIRFLOW → SNOWFLAKE
+    # ========================================================
 
     task2 = PythonOperator(
 
@@ -258,13 +277,27 @@ with DAG(
 
         python_callable=load_to_snowflake,
 
-        provide_context=True,
+    )
+
+
+    # ========================================================
+    # TASK 3: SNOWFLAKE → dbt
+    # ========================================================
+
+    task3 = BashOperator(
+
+        task_id="run_dbt",
+
+        bash_command="""
+        cd /opt/airflow/dbt_stocks
+        dbt build
+        """,
 
     )
 
 
-    # --------------------------------------------------------
-    # Task dependency
-    # --------------------------------------------------------
+    # ========================================================
+    # TASK DEPENDENCY
+    # ========================================================
 
-    task1 >> task2
+    task1 >> task2 >> task3
