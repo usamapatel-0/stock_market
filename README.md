@@ -2,37 +2,7 @@
 
 > End-to-end real-time stock market data engineering project using Python, Kafka, MinIO, Apache Airflow, Snowflake, dbt and Power BI.
 
-## 📌 Table of Contents
 
-- [Project Overview](#-project-overview)
-- [Business Problem](#-business-problem)
-- [Project Objectives](#-project-objectives)
-- [Architecture](#-architecture)
-- [Technology Stack](#-technology-stack)
-- [Project Structure](#-project-structure)
-- [Data Flow](#-data-flow)
-- [Finnhub API](#1-finnhub-api)
-- [Kafka Streaming](#2-kafka-streaming)
-- [MinIO Bronze Storage](#3-minio-bronze-storage)
-- [Apache Airflow](#4-apache-airflow)
-- [Snowflake](#5-snowflake)
-- [dbt Transformation](#6-dbt-transformation)
-- [Power BI](#7-power-bi)
-- [Automatic dbt Execution](#-automatic-dbt-execution)
-- [Docker Setup](#-docker-setup)
-- [Prerequisites](#-prerequisites)
-- [Configuration](#-configuration)
-- [How to Run](#-how-to-run)
-- [How to Verify](#-how-to-verify-the-pipeline)
-- [dbt Commands](#-dbt-commands)
-- [Troubleshooting](#-troubleshooting)
-- [Security](#-security)
-- [Future Improvements](#-future-improvements)
-- [Key Learning Outcomes](#-key-learning-outcomes)
-- [Resume Description](#-resume-description)
-- [Author](#-author)
-
----
 
 ## 🚀 Project Overview
 
@@ -94,57 +64,7 @@ This project demonstrates how these requirements can be implemented using a mode
 
 # 🏗️ Architecture
 
-```text
-                    ┌─────────────────┐
-                    │   Finnhub API   │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │ Python Producer │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │      Kafka      │
-                    │  stock-quotes   │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │ Python Consumer │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │     MinIO       │
-                    │ Bronze Storage  │
-                    └────────┬────────┘
-                             │
-                             ▼
-                 ┌────────────────────────┐
-                 │    Apache Airflow      │
-                 │    DAG Orchestration   │
-                 └───────────┬────────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │    Snowflake    │
-                    │   Raw/Bronze    │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │      dbt        │
-                    │ Silver → Gold   │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │    Power BI     │
-                    │    Dashboard    │
-                    └─────────────────┘
-```
+<img width="1282" height="740" alt="Screenshot 2026-09-17 114340" src="https://github.com/user-attachments/assets/6383fa09-92e8-475d-984b-bc20eabf28dd" />
 
 ---
 
@@ -258,6 +178,8 @@ Power BI
 # 1. 📡 Finnhub API
 
 The Python producer retrieves stock quote data from the Finnhub quote API.
+<img width="1826" height="895" alt="Screenshot 2026-09-17 122000" src="https://github.com/user-attachments/assets/d42abea7-3c63-4d84-9657-012f2f8e526b" />
+
 
 Configured symbols:
 
@@ -294,6 +216,19 @@ and publishes the JSON record to Kafka.
   "fetched_at": 1726560000
 }
 ```
+| Field        | Meaning                                                                      |        Example |
+| ------------ | ---------------------------------------------------------------------------- | -------------: |
+| `c`          | **Current stock price**                                                      |         150.25 |
+| `d`          | **Price change**                                                             |          +1.25 |
+| `dp`         | **Percentage price change**                                                  |         +0.84% |
+| `h`          | **Day's highest price**                                                      |         151.10 |
+| `l`          | **Day's lowest price**                                                       |         148.90 |
+| `o`          | **Day's opening price**                                                      |         149.50 |
+| `pc`         | **Previous closing price**                                                   |         149.00 |
+| `t`          | **Market timestamp**                                                         | Unix timestamp |
+| `symbol`     | **Stock ticker symbol — identifies which company/stock the data belongs to** |         `AAPL` |
+| `fetched_at` | **Timestamp when our Python producer fetched the data**                      | Unix timestamp |
+
 
 Values vary because the source is live market data.
 
@@ -302,6 +237,8 @@ Values vary because the source is live market data.
 # 2. 📨 Kafka Streaming
 
 Kafka is the streaming layer between the producer and consumer.
+<img width="1712" height="898" alt="image" src="https://github.com/user-attachments/assets/f307b9c7-6103-42fd-a37f-7e676e4b5f73" />
+
 
 Topic:
 
@@ -314,12 +251,15 @@ Flow:
 ```text
 Finnhub
    ↓
-Python Producer
+Python Producer->
    ↓
 Kafka: stock-quotes
    ↓
 Python Consumer
 ```
+<img width="1917" height="1015" alt="Screenshot 2026-09-12 161943" src="https://github.com/user-attachments/assets/413117ba-2442-4f20-9bf0-7232647b6b5c" />
+<img width="1917" height="1027" alt="Screenshot 2026-09-12 162047" src="https://github.com/user-attachments/assets/cbd5f7a0-91d2-4b10-a1cb-adf08b42e4e2" />
+
 
 Kafdrop is included to inspect topics and messages.
 
@@ -334,6 +274,10 @@ http://localhost:9000
 # 3. 🪣 MinIO Bronze Storage
 
 The Kafka consumer reads messages and stores them as JSON objects in MinIO.
+<img width="1843" height="908" alt="image" src="https://github.com/user-attachments/assets/40f47972-5a34-4995-8fa4-e724f6d5ae6d" />
+<img width="1845" height="1002" alt="image" src="https://github.com/user-attachments/assets/b10a1e75-b5f9-4e1e-b7b8-dcb5f225ee95" />
+
+
 
 Bucket:
 
@@ -490,6 +434,8 @@ the complete DAG run succeeded.
 # 5. ❄️ Snowflake
 
 Snowflake is the cloud data warehouse.
+<img width="1846" height="1023" alt="image" src="https://github.com/user-attachments/assets/e1ba703e-1b03-4552-a277-95681b1a4c1e" />
+
 
 Configured database:
 
