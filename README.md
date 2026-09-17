@@ -124,20 +124,11 @@ Real-Time-Stocks-MDS/
 │   │   ├── consumer.py
 │   │   └── Dockerfile
 │   ├── dags/
-│   │   └── minio_to_snowflake.py
+│   │   └── stock_data_pipeline.py
 │   ├── producer/
 │   │   ├── producer.py
 │   │   └── Dockerfile
 │   └── docker-compose.yml
-│
-├── docs/
-│   ├── architecture.png
-│   ├── finnhub-api-response.png
-│   ├── kafdrop-topic.png
-│   ├── minio-bucket.png
-│   ├── airflow-dag.png
-│   ├── snowflake-raw.png
-│   └── power-bi-dashboard.png
 │
 ├── requirements.txt
 ├── STOCK.pbix
@@ -309,11 +300,17 @@ http://localhost:9001
 # 4. ⚙️ Apache Airflow
 
 Airflow orchestrates the downstream pipeline.
+<img width="1840" height="1020" alt="image" src="https://github.com/user-attachments/assets/495292a4-96a8-4660-98e3-a1c1cc4d2e57" />
+
+<img width="1842" height="982" alt="image" src="https://github.com/user-attachments/assets/4ba43989-9238-4646-9843-1fb2f9d77789" />
+
+
+
 
 DAG:
 
 ```text
-minio_to_snowflake
+stock_data_pipeline
 ```
 
 Task dependency:
