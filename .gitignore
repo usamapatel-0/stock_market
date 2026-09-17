@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+logs/
+.env
+*.env
+dbt_stocks/dbt_stocks/target/
+dbt_stocks/dbt_stocks/logs/
+infra/logs/
+dbt_stocks/logs/
+__pycache__/
+*.pyc
